@@ -13,7 +13,7 @@ import yolo_reader
 parser = argparse.ArgumentParser(description="A python-based robot program")
 
 parser.add_argument("-id", type=int, required=True, help="Camera ID use to capture frames. Run print_cams.py for ref")
-parser.add_argument("--imshow", action="store_true", help="Flag to display frames")
+parser.add_argument("--imshow", action="store_true", help="Flag to display frames. Ctrl+C on terminal then SPACE while cam window active to safely stop program...")
 args = parser.parse_args()
 
 # RESOURCES

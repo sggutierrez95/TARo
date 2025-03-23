@@ -12,14 +12,12 @@ import yolo_reader
 # Arg setup
 parser = argparse.ArgumentParser(description="A python-based robot program")
 
+parser.add_argument("-id", type=int, required=True, help="Camera ID use to capture frames. Run print_cams.py for ref")
 parser.add_argument("--imshow", action="store_true", help="Flag to display frames")
-
-
-# CONFIGURATION
-use_webcam =  True
+args = parser.parse_args()
 
 # RESOURCES
-camera = cam_if.cam_if(use_webcam)
+camera = cam_if.cam_if(args.id)
 
 def signal_handler(sig, frame):
     camera.release()
@@ -45,7 +43,6 @@ def main(frame : cv2.UMat, model: YOLO, camera: cam_if.cam_if):
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
-    args = parser.parse_args()
 
     weights_file = find_weights_file('best.pt')
     model = YOLO(weights_file) 

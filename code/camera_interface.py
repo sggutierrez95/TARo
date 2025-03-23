@@ -12,7 +12,3 @@ class cam_if():
 
     def release(self):
         self.capture.release()
-
-    def display_frame(frame: cv2.UMat):
-        cv2.imshow('Webcam YOLO', frame)
-        cv2.waitKey(0)

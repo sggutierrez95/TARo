@@ -47,12 +47,6 @@ if __name__ == "__main__":
     # Set up signal handler to safely release resources
     signal.signal(signal.SIGINT, signal_handler)
 
-    # SYSTEM CONFIGURATION
-    use_webcam =  True
-
-    # RESOURCES
-    camera = cam_if.cam_if(use_webcam)
-
     # initialize robot
     taro_robot = taro.TARo()
 

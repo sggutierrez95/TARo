@@ -1,7 +1,11 @@
 import cv2
 
+class FrameResults():
+    def __init__(self):
+        self.waste_detected = False
+
 class Yolo_Reader():
-    def __init__(self, results):
+    def __init__(self, results : list):
         self.results = results
 
     def get_dressed_frame(self, frame):
@@ -17,3 +21,10 @@ class Yolo_Reader():
                 cv2.putText(dressed_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
         return dressed_frame
+
+    def evaluate_frame(self) -> FrameResults:
+        frame_rets = FrameResults()
+
+        frame_rets.waste_detected = self.results != []
+
+        return frame_rets

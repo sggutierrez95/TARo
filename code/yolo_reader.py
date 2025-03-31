@@ -1,6 +1,6 @@
 import cv2
 
-class FrameResults()
+class FrameResults():
     def __init__(self):
         self.waste_detected = False
 

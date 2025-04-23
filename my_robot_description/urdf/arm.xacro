@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:property name = "arm_base_length" value = ".1" />
+    <xacro:property name = "arm_base_width" value = ".1" />
+    <xacro:property name = "arm_base_height" value = ".02" />
+    <xacro:property name = "forearm_radius" value = ".02" />
+    <xacro:property name = "forearm_length" value = ".5" />
+    <xacro:property name = "hand_radius" value = ".02" />
+    <xacro:property name = "hand_length" value = ".4" />
+    <xacro:property name = "hand_2_radius" value = ".02" />
+    <xacro:property name = "hand_2_length" value = ".3" />
+    <xacro:property name = "eef_length" value = ".02" />
+    <xacro:property name = "eef_width" value = ".15" />
+    <xacro:property name = "eef_height" value = ".02" />
+    <xacro:property name = "eef_left_length" value = ".02" />
+    <xacro:property name = "eef_left_width" value = ".02" />
+    <xacro:property name = "eef_left_height" value = ".30" />
+    <xacro:property name = "eef_right_length" value = ".02" />
+    <xacro:property name = "eef_right_width" value = ".02" />
+    <xacro:property name = "eef_right_height" value = ".20" />
+
+
+
+    <!-- COMMENT LINE OUT IF NOT USING "STANDALONE ARM" SETUP -->
+    <!-- <link name="base_footprint"/> -->
+    <!-- COMMENT LINE OUT IF NOT USING "STANDALONE ARM" SETUP -->
+
+    <link name="arm_base_link">
+        <visual>
+            <geometry>
+                <box size="${arm_base_length} ${arm_base_width} ${arm_base_height}"/>
+            </geometry>
+            <origin xyz = "0 0 ${arm_base_height/2.0}" rpy="0 0 0" />
+            <material name="orange"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${arm_base_length} ${arm_base_width} ${arm_base_height}"/>
+            </geometry>
+            <origin xyz = "0 0 ${arm_base_height/2.0}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "5.0" x = "${arm_base_length}" y = "${arm_base_width}" z = "${arm_base_height}" o_xyz="0 0 ${arm_base_height/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <!-- COMMENT LINE OUT IF NOT USING "STANDALONE ARM" SETUP -->
+    <!-- <joint name="base_joint" type="fixed">
+        <parent link = "base_footprint"/>
+        <child link="arm_base_link"/>
+        <origin xyz = "0 0 ${arm_base_height/2}" rpy = "0 0 0"/>
+    </joint> -->
+    <!-- COMMENT LINE OUT IF NOT USING "STANDALONE ARM" SETUP -->
+
+    <link name="forearm_link">
+        <visual>
+            <geometry>
+                <cylinder radius="${forearm_radius}" length = "${forearm_length}" />
+            </geometry>
+            <origin xyz = "0 0 ${forearm_length/2}" rpy="0 0 0" />
+            <material name="yellow"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <cylinder radius="${forearm_radius}" length = "${forearm_length}" />
+            </geometry>
+            <origin xyz = "0 0 ${forearm_length/2}" rpy="0 0 0" />       
+        </collision>
+
+        <xacro:wheel_inertia m = ".3" r = "${forearm_radius}" l = "${forearm_length}" 
+                                o_xyz="0 0 ${forearm_length/2}" o_rpy="0 0 0"/>
+
+    </link>
+
+    <joint name="base_forearm_joint" type = "revolute">
+        <parent link = "arm_base_link"/>
+        <child link = "forearm_link"/>
+        <origin xyz = "0 0 ${arm_base_height}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+        <limit lower = "0" upper = "${pi/2}" effort = "100" velocity = "100"/>
+        <dynamics friction = "0.3" damping = "1"/>
+    </joint>
+
+    <link name="hand_link">
+        <visual>
+            <geometry>
+                <cylinder radius="${hand_radius}" length = "${hand_length}" />
+            </geometry>
+            <origin xyz = "0 0 ${hand_length/2}" rpy="0 0 0" />
+            <material name="orange"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <cylinder radius="${hand_radius}" length = "${hand_length}" />
+            </geometry>
+            <origin xyz = "0 0 ${hand_length/2}" rpy="0 0 0" />      
+        </collision>
+
+        <xacro:wheel_inertia m = ".3" r = "${hand_radius}" l = "${hand_length}" 
+                                o_xyz="0 0 ${hand_length/2}" o_rpy="0 0 0"/>
+
+    </link>
+
+    <joint name="forearm_hand_joint" type = "revolute">
+        <parent link = "forearm_link"/>
+        <child link = "hand_link"/>
+        <origin xyz = "0 0 ${forearm_length}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+        <limit lower = "0" upper = "${pi/2}" effort = "100" velocity = "100"/>
+        <dynamics friction = "0.3" damping = "1"/>
+    </joint>
+
+    <link name="hand_2_link">
+        <visual>
+            <geometry>
+                <cylinder radius="${hand_2_radius}" length = "${hand_2_length}" />
+            </geometry>
+            <origin xyz = "0 0 ${hand_2_length/2}" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <cylinder radius="${hand_2_radius}" length = "${hand_2_length}" />
+            </geometry>
+            <origin xyz = "0 0 ${hand_2_length/2}" rpy="0 0 0" />      
+        </collision>
+
+        <xacro:wheel_inertia m = ".3" r = "${hand_2_radius}" l = "${hand_2_length}" 
+                                o_xyz="0 0 ${hand_2_length/2}" o_rpy="0 0 0"/>
+
+    </link>
+
+    <joint name="hand_hand_2_joint" type = "revolute">
+        <parent link = "hand_link"/>
+        <child link = "hand_2_link"/>
+        <origin xyz = "0 0 ${hand_length}" rpy = "0 0 0"/>
+        <axis xyz = "0 1 0"/>
+        <limit lower = "0" upper = "${pi/2}" effort = "100" velocity = "100"/>
+        <dynamics friction = "0.9" damping = "1"/>
+    </joint>
+
+    <link name="eef_link">
+        <visual>
+            <geometry>
+                <box size="${eef_length} ${eef_width} ${eef_height}"/>
+            </geometry>
+            <origin xyz = "0 0 0" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${eef_length} ${eef_width} ${eef_height}"/>
+            </geometry>
+            <origin xyz = "0 0 0" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = ".3" x = "${eef_length}" y = "${eef_width}" z = "${eef_height}"
+                            o_xyz="0 0 0" o_rpy="0 0 0"/>
+    </link>
+
+    <joint name="hand_2_eef_joint" type = "fixed">
+        <parent link = "hand_2_link"/>
+        <child link = "eef_link"/>
+        <origin xyz = "0 0 ${hand_2_length}" rpy = "0 0 0"/>
+        <axis xyz = "0 0 0"/>
+    </joint>
+
+    <link name="eef_left_link">
+        <visual>
+            <geometry>
+                <box size="${eef_left_length} ${eef_left_width} ${eef_left_height}"/>
+            </geometry>
+            <origin xyz = "0 0 ${eef_left_height/2}" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${eef_left_length} ${eef_left_width} ${eef_left_height}"/>
+            </geometry>
+            <origin xyz = "0 0 ${eef_left_height}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = ".3" x = "${eef_left_length}" y = "${eef_left_width}" z = "${eef_left_height}"
+                            o_xyz="0 0 0" o_rpy="0 0 0"/>
+    </link>
+
+    <joint name="eef_eef_left_joint" type = "revolute">
+        <parent link = "eef_link"/>
+        <child link = "eef_left_link"/>
+        <origin xyz = "0 ${eef_width/2} ${eef_height/2}" rpy = "0 0 0"/>
+        <axis xyz = "1 0 0"/>
+        <limit lower = "0" upper = ".60" effort = "100" velocity = "100"/>
+        <dynamics friction = "0.3" damping = "1"/>
+    </joint>
+
+
+
+    <link name="eef_right_link">
+        <visual>
+            <geometry>
+                <box size="${eef_right_length} ${eef_right_width} ${eef_right_height}"/>
+            </geometry>
+            <origin xyz = "0 0 0" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${eef_right_length} ${eef_right_width} ${eef_right_height}"/>
+            </geometry>
+            <origin xyz = "0 0 0" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = ".3" x = "${eef_right_length}" y = "${eef_right_width}" z = "${eef_right_height}"
+                            o_xyz="0 0 0" o_rpy="0 0 0"/>
+    </link>
+
+    <joint name="eef_eef_right_joint" type = "fixed">
+        <parent link = "eef_link"/>
+        <child link = "eef_right_link"/>
+        <origin xyz = "0 -${eef_width/2} ${eef_height/2+eef_right_height/2}" rpy = "0 0 0"/>
+        <axis xyz = "0 0 0"/>
+    </joint>
+
+</robot>

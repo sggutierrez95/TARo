@@ -1,5 +1,5 @@
 from setuptools import find_packages, setup
-
+import os
 package_name = 'taro'
 
 setup(
@@ -10,8 +10,9 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        ('share/' + package_name +'/launch', ['launch/taro.launch.py']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools', 'ros_numpy', 'ultralytics'],
     zip_safe=True,
     maintainer='azazool',
     maintainer_email='sg.gutierrez95@gmail.com',

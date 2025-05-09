@@ -35,6 +35,7 @@
   <depend>tf2_ros</depend>
   <depend>moveit_task_constructor_core</depend>
   <depend>warehouse_ros_sqlite</depend>
+  <depend>python3-pip</depend>
 
   <build_depend>eigen</build_depend>
   <build_depend>geometric_shapes</build_depend>

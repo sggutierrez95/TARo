@@ -1,5 +1,6 @@
 import cv2
-import topic_if
+import os
+from . import topic_if
 
 class sim_cam_if(topic_if.SubscriberIf):
     def __init__(self, topic_name):

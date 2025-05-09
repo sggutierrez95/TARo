@@ -1,4 +1,4 @@
-import topic_if
+from . import topic_if
 
 
 class Robot_State_If(topic_if.SubscriberIf):

@@ -2,7 +2,7 @@ from enum import Enum
 
 import numpy as np
 
-import yolo_reader
+from . import yolo_reader
 import cv2
 
 # class syntax

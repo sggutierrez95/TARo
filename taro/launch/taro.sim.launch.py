@@ -10,14 +10,25 @@ from moveit_configs_utils import MoveItConfigsBuilder
 from launch_ros.parameter_descriptions import ParameterValue
 from launch.substitutions import Command
 from ament_index_python.packages import get_package_share_path
+from launch_xml.launch_description_sources import XMLLaunchDescriptionSource
 
 def generate_launch_description():
 
-    return LaunchDescription([
-            Node(
-                package="taro",
-                executable="taro_node",
-                output="log",
-                arguments=["-id", "0", "--imshow"]
+    my_robot_bringup_launch = IncludeLaunchDescription(
+        XMLLaunchDescriptionSource(
+            os.path.join(
+                get_package_share_directory("my_robot_bringup"),
+                "launch/my_robot_gazebo.launch.xml",
             )
+        )
+    )
+
+    return LaunchDescription([
+        my_robot_bringup_launch,
+        Node(
+            package="taro",
+            executable="taro_node",
+            output="log",
+            arguments=["-id", "-1", "--imshow"]
+        )
     ])

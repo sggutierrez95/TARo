@@ -69,72 +69,20 @@
       <pose>0 0 0 0 0 0</pose>
       <self_collide>false</self_collide>
     </model>
-    <model name='box'>
-      <pose>1.6106958457371547 -1.6646169245813267 0.49999999990199806 6.2287739151293738e-22 9.3279666454713669e-22 -3.6315533669320137e-22</pose>
-      <link name='box_link'>
-        <inertial>
-          <inertia>
-            <ixx>0.16666</ixx>
-            <ixy>0</ixy>
-            <ixz>0</ixz>
-            <iyy>0.16666</iyy>
-            <iyz>0</iyz>
-            <izz>0.16666</izz>
-          </inertia>
-          <mass>1</mass>
-          <pose>0 0 0 0 0 0</pose>
-        </inertial>
-        <collision name='box_collision'>
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
-          <surface>
-            <friction>
-              <ode/>
-            </friction>
-            <bounce/>
-            <contact/>
-          </surface>
-        </collision>
-        <visual name='box_visual'>
-          <geometry>
-            <box>
-              <size>1 1 1</size>
-            </box>
-          </geometry>
-          <material>
-            <ambient>0.300000012 0.300000012 0.300000012 1</ambient>
-            <diffuse>0.699999988 0.699999988 0.699999988 1</diffuse>
-            <specular>1 1 1 1</specular>
-          </material>
-        </visual>
-        <pose>0 0 0 0 0 0</pose>
-        <enable_wind>false</enable_wind>
-      </link>
-      <static>false</static>
-      <self_collide>false</self_collide>
-    </model>
     <include>
-      <uri>file:///home/azazool/ws_moveit/src/TARo/my_robot_bringup/worlds/models/bedtable/model.sdf</uri>
-      <name>BedTable</name>
-      <pose>-0.68037416782053972 -3.0916718500840492 0.0011537160800613622 1.8480969750324908e-18 5.5523750401308211e-10 -1.7005845020817138e-21</pose>
-    </include>
-    <include>
-      <uri>file:///home/azazool/ws_moveit/src/TARo/my_robot_bringup/worlds/models/coke can/model-1_3.sdf</uri>
+      <uri>file:///home/kyle/.gz/fuel/fuel.gazebosim.org/openrobotics/models/coke can/3</uri>
       <name>coke_can</name>
-      <pose>0.68804885623066492 1.4164521081813901 -0.0038934259799864369 -0.011212437679893428 0.0040284600779771354 0.0003078216615611378</pose>
+      <pose>3.762818574600701 -0.13684088123180352 -0.0038942889408694523 -0.011212747097662188 0.0040285481247425269 0.00030782066698037652</pose>
     </include>
     <include>
-      <uri>file:///home/azazool/ws_moveit/src/TARo/my_robot_bringup/worlds/models/coke can/model-1_3.sdf</uri>
+      <uri>file:///home/kyle/.gz/fuel/fuel.gazebosim.org/openrobotics/models/coke can/3</uri>
       <name>coke_can_0</name>
-      <pose>-0.43535201784324423 1.0355594669337744 -0.0038934469953868156 -0.011214136038040582 0.0040287633113960013 0.0015680870623052514</pose>
+      <pose>3.0541977891093777 -0.74901651819790782 -0.0038942881426255161 -0.011212770741595733 0.0040285526867191307 0.0015680953945301284</pose>
     </include>
     <include>
-      <uri>file:///home/azazool/ws_moveit/src/TARo/my_robot_bringup/worlds/models/coke can/model-1_3.sdf</uri>
+      <uri>file:///home/kyle/.gz/fuel/fuel.gazebosim.org/openrobotics/models/coke can/3</uri>
       <name>coke_can_1</name>
-      <pose>1.8455128975264314 0.48229077705021972 -0.0038934331482516739 -0.011212988499144746 0.0040285478121304336 0.0015663151045356483</pose>
+      <pose>1.8455128975277457 0.48229077705778078 -0.0038934331253712858 -0.011212986559961738 0.004028547472992452 0.0015663151120545496</pose>
     </include>
     <light name='sun' type='directional'>
       <pose>0 0 10 0 0 0</pose>

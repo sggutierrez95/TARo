@@ -7,25 +7,143 @@
     <xacro:property name = "wheel_radius" value = ".2" />
     <xacro:property name = "wheel_length" value = ".1" />
 
+    <xacro:property name = "base_length_h" value = ".6" />
+    <xacro:property name = "base_thickness" value = ".01" />
+
+
     <link name="base_footprint"/>
 
     <link name="base_link">
         <visual>
             <geometry>
-                <box size="${base_length} ${base_width} ${base_height}"/>
+                <box size="${base_length_h} ${base_width} ${base_height}"/>
             </geometry>
-            <origin xyz = "0 0 ${base_height/2}" rpy="0 0 0" />
+            <origin xyz = "${base_length_h/2} 0 ${base_height/2}" rpy="0 0 0" />
             <material name="blue"/>
         </visual>
 
         <collision>
             <geometry>
-                <box size="${base_length} ${base_width} ${base_height}"/>
+                <box size="${base_length_h} ${base_width} ${base_height}"/>
             </geometry>
-            <origin xyz = "0 0 ${base_height/2}" rpy="0 0 0" />         
+            <origin xyz = "${base_length_h/2} 0 ${base_height/2}" rpy="0 0 0" />         
         </collision>
-        <xacro:box_inertia m = "5.0" x = "${base_length}" y = "${base_width}" z = "${base_height}"
-                            o_xyz="0 0 ${base_height/2}" o_rpy="0 0 0"/>
+        <xacro:box_inertia m = "5.0" x = "${base_length_h}" y = "${base_width}" z = "${base_height}"
+                            o_xyz="${base_length_h/2} 0 ${base_height/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <link name="base_link_floor">
+        <visual>
+            <geometry>
+                <box size="${base_length_h} ${base_width-2*base_thickness} ${base_thickness}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} 0 ${base_thickness/2}" rpy="0 0 0" />
+            <material name="grey"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${base_length_h} ${base_width-2*base_thickness} ${base_thickness}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} 0 ${base_thickness/2}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "2" x = "${base_length_h}" y = "${base_width-2*base_thickness}" z = "${base_thickness}"
+                            o_xyz="${-base_length_h/2} 0 ${base_thickness/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <link name="base_link_wall_left">
+        <visual>
+            <geometry>
+                <box size="${base_length_h} ${base_thickness} ${base_height}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} ${base_width/2-base_thickness/2} ${base_height/2}" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${base_length_h} ${base_thickness} ${base_height}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} ${base_width/2-base_thickness/2} ${base_height/2}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "2" x = "${base_length_h}" y = "${base_thickness}" z = "${base_height}"
+                            o_xyz="${-base_length_h/2} ${base_width/2-base_thickness/2} ${base_height/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <link name="base_link_wall_right">
+        <visual>
+            <geometry>
+                <box size="${base_length_h} ${base_thickness} ${base_height}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} -${base_width/2-base_thickness/2} ${base_height/2}" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${base_length_h} ${base_thickness} ${base_height}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} -${base_width/2-base_thickness/2} ${base_height/2}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "2" x = "${base_length_h}" y = "${base_thickness}" z = "${base_height}"
+                            o_xyz="${-base_length_h/2} -${base_width/2-base_thickness/2} ${base_height/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <link name="base_link_wall_rear_mid">
+        <visual>
+            <geometry>
+                <box size="${base_thickness} ${base_width-base_thickness*2} ${base_height}"/>
+            </geometry>
+            <origin xyz = "-${base_length_h/2+base_thickness} 0 ${base_height/2}" rpy="0 0 0" />
+            <material name="grey"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${base_thickness} ${base_width-base_thickness*2} ${base_height}"/>
+            </geometry>
+            <origin xyz = "-${base_length_h/2+base_thickness} 0 ${base_height/2}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "2" x = "${base_thickness}" y = "${base_width-base_thickness*2}" z = "${base_height}"
+                            o_xyz="-${base_length_h/2+base_thickness} 0 ${base_height/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <link name="base_link_wall_rear_end">
+        <visual>
+            <geometry>
+                <box size="${base_thickness} ${base_width} ${base_height}"/>
+            </geometry>
+            <origin xyz = "-${base_length_h} 0 ${base_height/2}" rpy="0 0 0" />
+            <material name="blue"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${base_thickness} ${base_width} ${base_height}"/>
+            </geometry>
+            <origin xyz = "-${base_length_h} 0 ${base_height/2}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "2" x = "${base_thickness}" y = "${base_width}" z = "${base_height}"
+                            o_xyz="-${base_length_h} 0 ${base_height/2}" o_rpy="0 0 0"/>
+    </link>
+
+    <link name="base_link_wall_split">
+        <visual>
+            <geometry>
+                <box size="${base_length_h} ${base_thickness} ${base_height}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} 0 ${base_height/2}" rpy="0 0 0" />
+            <material name="grey"/>
+        </visual>
+
+        <collision>
+            <geometry>
+                <box size="${base_length_h} ${base_thickness} ${base_height}"/>
+            </geometry>
+            <origin xyz = "${-base_length_h/2} 0 ${base_height/2}" rpy="0 0 0" />         
+        </collision>
+        <xacro:box_inertia m = "2" x = "${base_length_h}" y = "${base_thickness}" z = "${base_height}"
+                            o_xyz="${-base_length_h/2} 0 ${base_height/2}" o_rpy="0 0 0"/>
     </link>
 
     <xacro:macro name = "wheel_link" params="prefix">
@@ -72,7 +190,43 @@
 
     <joint name="base_joint" type="fixed">
         <parent link = "base_footprint"/>
+        <child link="base_link_floor"/>
+        <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
+    </joint>
+
+    <joint name="base_joint_floor" type="fixed">
+        <parent link = "base_footprint"/>
         <child link="base_link"/>
+        <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
+    </joint>
+
+    <joint name="base_joint_left_wall" type="fixed">
+        <parent link = "base_footprint"/>
+        <child link="base_link_wall_left"/>
+        <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
+    </joint>
+
+    <joint name="base_joint_right_wall" type="fixed">
+        <parent link = "base_footprint"/>
+        <child link="base_link_wall_right"/>
+        <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
+    </joint>
+
+    <joint name="base_joint_rear_wall_mid" type="fixed">
+        <parent link = "base_footprint"/>
+        <child link="base_link_wall_rear_mid"/>
+        <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
+    </joint>
+
+    <joint name="base_joint_rear_wall_end" type="fixed">
+        <parent link = "base_footprint"/>
+        <child link="base_link_wall_rear_end"/>
+        <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
+    </joint>
+
+    <joint name="base_joint_rear_wall_split" type="fixed">
+        <parent link = "base_footprint"/>
+        <child link="base_link_wall_split"/>
         <origin xyz = "0 0 ${wheel_radius}" rpy = "0 0 0"/>
     </joint>
 

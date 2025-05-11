@@ -2,7 +2,11 @@ from setuptools import find_packages, setup
 import os
 import glob
 
-def package_files(data_files, directory_list):
+# import logging
+# logging.basicConfig(level=logging.INFO) # Set the logging level
+# log = logging.getLogger(__name__)
+
+def package_files(data_files, directory_list, dest_path):
 
     paths_dict = {}
 
@@ -13,7 +17,7 @@ def package_files(data_files, directory_list):
             for filename in filenames:
 
                 file_path = os.path.join(path, filename)
-                install_path = os.path.join('lib', package_name, path)
+                install_path = os.path.join(dest_path, path)
                 
                 if install_path in paths_dict.keys():
                     paths_dict[install_path].append(file_path)
@@ -28,22 +32,14 @@ def package_files(data_files, directory_list):
 
 package_name = 'taro'
 
-runs_files = []
-# runs_files = package_files(runs_files, ['runs'])
-files = []
-for path in glob.glob('runs/**', recursive=True):
-    if os.path.isfile(path):
-        files.append(path)
-
 supporting_files = [
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('lib/runs' , files),
         ('share/' + package_name +'/launch', ['launch/taro.launch.py', 'launch/taro.sim.launch.py']),
 ]
-for run_file in runs_files:
-    supporting_files.append(run_file)
+
+supporting_files = package_files(supporting_files, ['runs'], 'lib')
 
 setup(
     name=package_name,

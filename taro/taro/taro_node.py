@@ -5,29 +5,30 @@ import signal
 import time
 import sys
 import argparse
+import atexit
 
 import rclpy
+from rclpy.node import Node
+from rclpy.executors import SingleThreadedExecutor
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+from std_msgs.msg import Float64
 
-from .interfaces.camera_interface import cam_if
 
 from . import yolo_reader
 from . import taro
+from .interfaces.topic_if import SubscriberIf
 
 # Arg setup
 parser = argparse.ArgumentParser(description="A python-based robot program")
 
 parser.add_argument("-id", type=int, required=True, help="Camera ID use to capture frames. Run print_cams.py for ref")
 parser.add_argument("--imshow", action="store_true", help="Flag to display frames. Ctrl+C on terminal then SPACE while cam window active to safely stop program...")
+parser.add_argument("-urdf", type=str, required=True, help="Path to the urdf of the robot")
 # parser.add_argument("--ros-args", action="store_true")
-args, UNKNOWN = parser.parse_known_args()
-
-# RESOURCES
-camera = cam_if(args.id)
+parsed_args, UNKNOWN = parser.parse_known_args()
 
 def signal_handler(sig, frame):
-    camera.release()
-    rclpy.shutdown()
-    cv2.destroyAllWindows()
     print('Killed Program')
     sys.exit(0)
 
@@ -41,44 +42,72 @@ def find_weights_file(fn: str):
         if fn in files:
             return os.path.join(root, fn)
 
+class Taro_Node(SubscriberIf):
+    def __init__(self, urdf_path : str ):
+        super().__init__('taro_node', 'camera/image_raw', Image, self.main_callback)
+        self.arm_joint_if = [
+            self.create_publisher(Float64, '/joint0/cmd_pos',10),
+            self.create_publisher(Float64, '/joint1/cmd_pos',10),
+            self.create_publisher(Float64, '/joint2/cmd_pos',10),
+            self.create_publisher(Float64, '/joint3/cmd_pos',10)
+        ]
+        self.gripper_joints_if = [
+            self.create_publisher(Float64, '/joint4/cmd_pos',10)
+        ]
+        self.img = None
+        self.new_img = False
+        self.bridge = CvBridge()
 
-def taro_main(frame : cv2.UMat, model: YOLO, camera: cam_if, taro_robot : taro.TARo):
-    ret_frame = frame
-    reader = yolo_reader.Yolo_Reader(model(frame))
+        weights_file = find_weights_file('sim_best.pt')
+        self.yolo_model = YOLO(weights_file)
+        self.taro_robot = taro.TARo(urdf_path, self.arm_joint_if, self.gripper_joints_if, self.get_logger())
 
-    taro_robot.run(reader)
+    def process_image_raw(self, data):
+        self.get_logger().info('Received image')
+        return self.bridge.imgmsg_to_cv2(data, "bgr8")
+        # return cv2.resize(
+        #     self.bridge.imgmsg_to_cv2(data, "bgr8"), (380, 507)
+        # )
 
-    dressed_frame = reader.get_dressed_frame(frame)
-    return dressed_frame
+    def destroy(self):
+        self.taro_robot.destroy()
 
+    def main_callback(self, data):
+        try:
+            # Process Raw Image to frame
+            frame = self.process_image_raw(data)
+            # YOLO the frame
+            reader =  yolo_reader.Yolo_Reader(self.yolo_model(frame))
+            # Run Taro
+            self.taro_robot.run(reader)
 
-def main():
-    node = rclpy.create_node('taro_node')
-    logger = node.get_logger()
+            dressed_frame = reader.get_dressed_frame(frame, self.get_logger())
+            if parsed_args.imshow:
+                cv2.imshow('Webcam YOLO', dressed_frame)
+                cv2.waitKey(0)
+
+        except Exception as e:
+            self.get_logger().error(f"Error processing image: {e}")
+    
+
+def main(args=None):
     # Set up signal handler to safely release resources
     signal.signal(signal.SIGINT, signal_handler)
+    rclpy.init(args=args)
 
-    # initialize robot
-    taro_robot = taro.TARo()
+    taro_node = Taro_Node(parsed_args.urdf)
 
-    # set up model
-    weights_file = find_weights_file('best.pt')
-    model = YOLO(weights_file) 
+    # Spin Node
+    rclpy.spin(taro_node)
 
-    logger.warn('I am going to run')
-    while True:
-        # rRead current frame
-        ret, frame = camera.read()
-        logger.warn('I am running')
-        if ret and frame is not None:
-            logger.warn('I am processing an img...')
-            # Run a cycle of TARo Robot frame
-            frame = taro_main(frame, model, camera, taro_robot)
+    # Clean up
+    def cleanup():
+        taro_node.destroy()
+        taro_node.destroy_node()
+        rclpy.shutdown()
+        cv2.destroyAllWindows()
 
-            # '--imshow' to see webcam frame
-            if args.imshow:
-                cv2.imshow('Webcam YOLO', frame)
-                cv2.waitKey(0)
-        else:
-           logger.warn('I am waiting for an img...')
+    atexit.register(cleanup)
 
+if __name__ == '__main__':
+    main()

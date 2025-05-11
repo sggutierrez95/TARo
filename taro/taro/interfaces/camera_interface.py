@@ -19,9 +19,10 @@ class sim_cam_if(topic_if.SubscriberIf):
     def img_listener_callback(self, data):
         try:
             self.img = self.bridge.imgmsg_to_cv2(data, "bgr8")
-            cv2.imshow("Received Image", self.img)
-            cv2.waitKey(1)
-            self.get_logger().info('Received image')
+            self.img = cv2.resize(self.img, (380, 507))
+            # cv2.imshow("Received Image", self.img)
+            # cv2.waitKey(1)
+            # self.get_logger().info('Received image')
         except Exception as e:
             self.get_logger().error(f"Error processing image: {e}")
 
@@ -31,7 +32,10 @@ class sim_cam_if(topic_if.SubscriberIf):
     def release(self):
         self.destroy_node()
 
-class cam_if():
+    def spin(self):
+        rclpy.spin(self)
+
+class Camera_Subscriber():
     def __init__(self, cam_id: int):
         self.sim_cam = None
         if cam_id >= 0:
@@ -42,7 +46,7 @@ class cam_if():
             self.capture.set(4, 380)
         else:
             self.sim_cam = sim_cam_if('camera/image_raw')
-            rclpy.spin(self.sim_cam)
+            # rclpy.spin(self.sim_cam)
 
     def is_sim_cam_ready(self, sim_cam : sim_cam_if):
         return sim_cam.new_img
@@ -51,6 +55,7 @@ class cam_if():
         if self.sim_cam is None:
             return self.capture.read() 
         else:
+            self.sim_cam.get_logger().info('reading sim img')
             img = self.sim_cam.read()
             if img is not None:
                 img = cv2.resize(img, (380, 570))
@@ -58,4 +63,10 @@ class cam_if():
         return True, img
                 
     def release(self):
-        self.capture.release()
+        if self.sim_cam is not None:
+            self.capture.release()
+        else:
+            self.sim_cam.destroy_node()
+
+    def spin(self):
+        self.sim_cam.spin()

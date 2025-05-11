@@ -41,12 +41,42 @@
     <group_state name="close" group="hand">
         <joint name="eef_eef_left_joint" value="0.5503"/>
     </group_state>
+    <group_state name="back_left_bin" group="taro_arm">
+        <joint name="base_forearm_joint" value="0.2169"/>
+        <joint name="forearm_hand_joint" value="1.0674"/>
+        <joint name="hand_hand_2_joint" value="1.2843"/>
+        <joint name="mobile_base_arm_joint" value="-2.8985"/>
+    </group_state>
+    <group_state name="back_right_bin" group="taro_arm">
+        <joint name="base_forearm_joint" value="0.2169"/>
+        <joint name="forearm_hand_joint" value="0.9632"/>
+        <joint name="hand_hand_2_joint" value="1.3538"/>
+        <joint name="mobile_base_arm_joint" value="2.9332"/>
+    </group_state>
+    <group_state name="front_left_bin" group="taro_arm">
+        <joint name="base_forearm_joint" value="0"/>
+        <joint name="forearm_hand_joint" value="1.5707"/>
+        <joint name="hand_hand_2_joint" value="1.3624"/>
+        <joint name="mobile_base_arm_joint" value="-2.6902"/>
+    </group_state>
+    <group_state name="front_right_bin" group="taro_arm">
+        <joint name="base_forearm_joint" value="0"/>
+        <joint name="forearm_hand_joint" value="1.319"/>
+        <joint name="hand_hand_2_joint" value="1.5707"/>
+        <joint name="mobile_base_arm_joint" value="2.7597"/>
+    </group_state>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
     <end_effector name="taro_hand" parent_link="hand_2_link" group="hand"/>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="v_base_link" type="planar" parent_frame="odometry" child_link="base_link"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
     <disable_collisions link1="arm_base_link" link2="base_link" reason="Adjacent"/>
+    <disable_collisions link1="arm_base_link" link2="base_link_floor" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_link_wall_left" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_link_wall_rear_end" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_link_wall_rear_mid" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_link_wall_right" reason="Never"/>
+    <disable_collisions link1="arm_base_link" link2="base_link_wall_split" reason="Never"/>
     <disable_collisions link1="arm_base_link" link2="camera_link" reason="Never"/>
     <disable_collisions link1="arm_base_link" link2="caster_wheel_link" reason="Never"/>
     <disable_collisions link1="arm_base_link" link2="eef_left_link" reason="Never"/>
@@ -57,10 +87,56 @@
     <disable_collisions link1="arm_base_link" link2="hand_link" reason="Never"/>
     <disable_collisions link1="arm_base_link" link2="left_wheel_link" reason="Never"/>
     <disable_collisions link1="arm_base_link" link2="right_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link" link2="base_link_floor" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="base_link_wall_left" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="base_link_wall_rear_end" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="base_link_wall_rear_mid" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="base_link_wall_right" reason="Adjacent"/>
+    <disable_collisions link1="base_link" link2="base_link_wall_split" reason="Adjacent"/>
     <disable_collisions link1="base_link" link2="caster_wheel_link" reason="Adjacent"/>
     <disable_collisions link1="base_link" link2="forearm_link" reason="Never"/>
     <disable_collisions link1="base_link" link2="left_wheel_link" reason="Adjacent"/>
     <disable_collisions link1="base_link" link2="right_wheel_link" reason="Adjacent"/>
+    <disable_collisions link1="base_link_floor" link2="base_link_wall_left" reason="Adjacent"/>
+    <disable_collisions link1="base_link_floor" link2="base_link_wall_rear_end" reason="Adjacent"/>
+    <disable_collisions link1="base_link_floor" link2="base_link_wall_rear_mid" reason="Adjacent"/>
+    <disable_collisions link1="base_link_floor" link2="base_link_wall_right" reason="Adjacent"/>
+    <disable_collisions link1="base_link_floor" link2="base_link_wall_split" reason="Adjacent"/>
+    <disable_collisions link1="base_link_floor" link2="caster_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_floor" link2="forearm_link" reason="Never"/>
+    <disable_collisions link1="base_link_floor" link2="hand_link" reason="Never"/>
+    <disable_collisions link1="base_link_floor" link2="left_wheel_link" reason="Default"/>
+    <disable_collisions link1="base_link_floor" link2="right_wheel_link" reason="Default"/>
+    <disable_collisions link1="base_link_wall_left" link2="base_link_wall_rear_end" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_left" link2="base_link_wall_rear_mid" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_left" link2="base_link_wall_right" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_left" link2="base_link_wall_split" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_left" link2="caster_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_left" link2="forearm_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_left" link2="left_wheel_link" reason="Default"/>
+    <disable_collisions link1="base_link_wall_left" link2="right_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="base_link_wall_rear_mid" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="base_link_wall_right" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="base_link_wall_split" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="caster_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="forearm_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="left_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_end" link2="right_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_mid" link2="base_link_wall_right" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_rear_mid" link2="base_link_wall_split" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_rear_mid" link2="caster_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_mid" link2="forearm_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_rear_mid" link2="left_wheel_link" reason="Default"/>
+    <disable_collisions link1="base_link_wall_rear_mid" link2="right_wheel_link" reason="Default"/>
+    <disable_collisions link1="base_link_wall_right" link2="base_link_wall_split" reason="Adjacent"/>
+    <disable_collisions link1="base_link_wall_right" link2="caster_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_right" link2="forearm_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_right" link2="left_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_right" link2="right_wheel_link" reason="Default"/>
+    <disable_collisions link1="base_link_wall_split" link2="caster_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_split" link2="forearm_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_split" link2="left_wheel_link" reason="Never"/>
+    <disable_collisions link1="base_link_wall_split" link2="right_wheel_link" reason="Never"/>
     <disable_collisions link1="camera_link" link2="caster_wheel_link" reason="Never"/>
     <disable_collisions link1="camera_link" link2="eef_left_link" reason="Never"/>
     <disable_collisions link1="camera_link" link2="eef_link" reason="Default"/>

@@ -15,7 +15,7 @@
     <xacro:property name = "eef_height" value = ".02" />
     <xacro:property name = "eef_left_length" value = ".02" />
     <xacro:property name = "eef_left_width" value = ".02" />
-    <xacro:property name = "eef_left_height" value = ".30" />
+    <xacro:property name = "eef_left_height" value = ".25" />
     <xacro:property name = "eef_right_length" value = ".02" />
     <xacro:property name = "eef_right_width" value = ".02" />
     <xacro:property name = "eef_right_height" value = ".20" />
@@ -68,7 +68,7 @@
             <origin xyz = "0 0 ${forearm_length/2}" rpy="0 0 0" />       
         </collision>
 
-        <xacro:wheel_inertia m = ".3" r = "${forearm_radius}" l = "${forearm_length}" 
+        <xacro:wheel_inertia m = ".1" r = "${forearm_radius}" l = "${forearm_length}" 
                                 o_xyz="0 0 ${forearm_length/2}" o_rpy="0 0 0"/>
 
     </link>
@@ -87,7 +87,7 @@
             <geometry>
                 <cylinder radius="${hand_radius}" length = "${hand_length}" />
             </geometry>
-            <origin xyz = "0 0 ${hand_length/2}" rpy="0 0 0" />
+            <origin xyz = "0 ${forearm_radius*2} ${hand_length/2}" rpy="0 0 0" />
             <material name="orange"/>
         </visual>
 
@@ -95,11 +95,11 @@
             <geometry>
                 <cylinder radius="${hand_radius}" length = "${hand_length}" />
             </geometry>
-            <origin xyz = "0 0 ${hand_length/2}" rpy="0 0 0" />      
+            <origin xyz = "0 ${forearm_radius*2} ${hand_length/2}" rpy="0 0 0" />      
         </collision>
 
-        <xacro:wheel_inertia m = ".3" r = "${hand_radius}" l = "${hand_length}" 
-                                o_xyz="0 0 ${hand_length/2}" o_rpy="0 0 0"/>
+        <xacro:wheel_inertia m = ".1" r = "${hand_radius}" l = "${hand_length}" 
+                                o_xyz="0 ${forearm_radius*2} ${hand_length/2}" o_rpy="0 0 0"/>
 
     </link>
 
@@ -128,7 +128,7 @@
             <origin xyz = "0 0 ${hand_2_length/2}" rpy="0 0 0" />      
         </collision>
 
-        <xacro:wheel_inertia m = ".3" r = "${hand_2_radius}" l = "${hand_2_length}" 
+        <xacro:wheel_inertia m = ".1" r = "${hand_2_radius}" l = "${hand_2_length}" 
                                 o_xyz="0 0 ${hand_2_length/2}" o_rpy="0 0 0"/>
 
     </link>
@@ -147,7 +147,7 @@
             <geometry>
                 <box size="${eef_length} ${eef_width} ${eef_height}"/>
             </geometry>
-            <origin xyz = "0 0 0" rpy="0 0 0" />
+            <origin xyz = "0 0 ${eef_length/2}" rpy="0 0 0" />
             <material name="blue"/>
         </visual>
 
@@ -155,10 +155,10 @@
             <geometry>
                 <box size="${eef_length} ${eef_width} ${eef_height}"/>
             </geometry>
-            <origin xyz = "0 0 0" rpy="0 0 0" />         
+            <origin xyz = "0 0 ${eef_length/2}" rpy="0 0 0" />         
         </collision>
-        <xacro:box_inertia m = ".3" x = "${eef_length}" y = "${eef_width}" z = "${eef_height}"
-                            o_xyz="0 0 0" o_rpy="0 0 0"/>
+        <xacro:box_inertia m = ".01" x = "${eef_length}" y = "${eef_width}" z = "${eef_height}"
+                            o_xyz="0 0 ${eef_length/2}" o_rpy="0 0 0"/>
     </link>
 
     <joint name="hand_2_eef_joint" type = "fixed">
@@ -173,7 +173,7 @@
             <geometry>
                 <box size="${eef_left_length} ${eef_left_width} ${eef_left_height}"/>
             </geometry>
-            <origin xyz = "0 0 ${eef_left_height/2}" rpy="0 0 0" />
+            <origin xyz = "${eef_right_width} 0 ${eef_left_height/2}" rpy="0 0 0" />
             <material name="blue"/>
         </visual>
 
@@ -181,10 +181,10 @@
             <geometry>
                 <box size="${eef_left_length} ${eef_left_width} ${eef_left_height}"/>
             </geometry>
-            <origin xyz = "0 0 ${eef_left_height}" rpy="0 0 0" />         
+            <origin xyz = "${eef_right_width} 0 ${eef_left_height/2}" rpy="0 0 0" />         
         </collision>
-        <xacro:box_inertia m = ".3" x = "${eef_left_length}" y = "${eef_left_width}" z = "${eef_left_height}"
-                            o_xyz="0 0 0" o_rpy="0 0 0"/>
+        <xacro:box_inertia m = ".01" x = "${eef_left_length}" y = "${eef_left_width}" z = "${eef_left_height}"
+                            o_xyz="${eef_right_width} 0 ${eef_left_height/2}" o_rpy="0 0 0"/>
     </link>
 
     <joint name="eef_eef_left_joint" type = "revolute">
@@ -203,7 +203,7 @@
             <geometry>
                 <box size="${eef_right_length} ${eef_right_width} ${eef_right_height}"/>
             </geometry>
-            <origin xyz = "0 0 0" rpy="0 0 0" />
+            <origin xyz = "${eef_right_width} 0 0" rpy="0 0 0" />
             <material name="blue"/>
         </visual>
 
@@ -211,10 +211,10 @@
             <geometry>
                 <box size="${eef_right_length} ${eef_right_width} ${eef_right_height}"/>
             </geometry>
-            <origin xyz = "0 0 0" rpy="0 0 0" />         
+            <origin xyz = "${eef_right_width} 0 0" rpy="0 0 0" />         
         </collision>
-        <xacro:box_inertia m = ".3" x = "${eef_right_length}" y = "${eef_right_width}" z = "${eef_right_height}"
-                            o_xyz="0 0 0" o_rpy="0 0 0"/>
+        <xacro:box_inertia m = ".01" x = "${eef_right_length}" y = "${eef_right_width}" z = "${eef_right_height}"
+                            o_xyz="${eef_right_width} 0 0" o_rpy="0 0 0"/>
     </link>
 
     <joint name="eef_eef_right_joint" type = "fixed">

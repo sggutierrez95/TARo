@@ -63,11 +63,14 @@ class Taro_Node(SubscriberIf):
         self.taro_robot = taro.TARo(urdf_path, self.arm_joint_if, self.gripper_joints_if, self.get_logger())
 
     def process_image_raw(self, data):
-        self.get_logger().info('Received image')
-        return self.bridge.imgmsg_to_cv2(data, "bgr8")
-        # return cv2.resize(
-        #     self.bridge.imgmsg_to_cv2(data, "bgr8"), (380, 507)
-        # )
+        # self.get_logger().info('Received image')
+        # Convert to cv2 format
+        raw_img = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        # Crop image to avoid looking at arms
+        # so crop the left and right sides
+        x_start, x_end = 235, 435
+        cropped_image = raw_img[:, x_start:x_end]
+        return cropped_image
 
     def destroy(self):
         self.taro_robot.destroy()

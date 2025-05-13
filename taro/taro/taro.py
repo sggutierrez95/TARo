@@ -115,6 +115,12 @@ class TaroActions():
         b = math.radians(1)
         return m*delta_margin + b
 
+    def delta_hand_joint_move(self, delta_margin):
+        # We will use a linear function to determine how far to move left or right
+        m = 0.001
+        b = math.radians(1)
+        return m*delta_margin + b
+
     # def move_right(self, current_pos, delta_margin):
     #     new_pos = current_pos
     #     self.logger.info(f'Orig. Pos = [ {current_pos[0]}, {current_pos[1]}, {current_pos[2]} ] ')
@@ -150,6 +156,24 @@ class TaroActions():
         current_pos = current_robot_state.position
         self.logger.info(f'New. Pos = [ {current_pos[0]}, {current_pos[1]}, {current_pos[2]} ] ')
 
+    def move_up(self, current_robot_state: RobotState, delta_margin):
+        current_pos = current_robot_state.position
+        self.logger.info(f'Orig. Pos = [ {current_pos[0]}, {current_pos[1]}, {current_pos[2]} ] ')
+        delta_base_ang = self.delta_base_joint_move(delta_margin)
+        current_robot_state.joints[3] = current_robot_state.joints[3] + delta_base_ang
+        current_robot_state.position = self.robot_if.cmd_arm(current_robot_state.joints)
+        current_pos = current_robot_state.position
+        self.logger.info(f'New. Pos = [ {current_pos[0]}, {current_pos[1]}, {current_pos[2]} ] ')
+
+    def move_down(self, current_robot_state: RobotState, delta_margin):
+        current_pos = current_robot_state.position
+        self.logger.info(f'Orig. Pos = [ {current_pos[0]}, {current_pos[1]}, {current_pos[2]} ] ')
+        delta_base_ang = self.delta_base_joint_move(delta_margin)
+        current_robot_state.joints[3] = current_robot_state.joints[3] - delta_base_ang
+        current_robot_state.position = self.robot_if.cmd_arm(current_robot_state.joints)
+        current_pos = current_robot_state.position
+        self.logger.info(f'New. Pos = [ {current_pos[0]}, {current_pos[1]}, {current_pos[2]} ] ')
+
     def center_bb(self, current_robot_state: RobotState, reader : yolo_reader.Yolo_Reader):
         self.logger.info('Begining Bounding Box Centering')
 
@@ -180,6 +204,7 @@ class TaroActions():
 
         pixel_padding = 10
         padded_optimal_width_margin = optimal_width_margin + pixel_padding
+        padded_optimal_height_margin = optimal_height_margin + pixel_padding
 
         is_centered = True
         if x_1 > padded_optimal_width_margin:
@@ -192,6 +217,19 @@ class TaroActions():
             self.logger.info(f'BB too far to the Left. Move Right orig_img_width - x_2 = {orig_img_width - x_2} > ~{optimal_width_margin}')
             delta_margin = abs((orig_img_width - x_2) - optimal_width_margin )
             self.move_right(current_robot_state, delta_margin)
+
+        if y_1 > padded_optimal_height_margin:
+            is_centered = False
+            self.logger.info(f'BB too low. Move up Y1 = {y_1} > ~{optimal_height_margin}')
+            delta_margin = abs(y_1 - optimal_height_margin )
+            self.move_up(current_robot_state, delta_margin)
+        if (orig_img_height - y_2) > padded_optimal_height_margin:
+            is_centered = False
+            self.logger.info(f'BB too high. Move down orig_img_height - y_2 = {orig_img_height - y_2} > ~{optimal_height_margin}')
+            delta_margin = abs((orig_img_height - y_2) - optimal_height_margin )
+            self.move_down(current_robot_state, delta_margin)
+
+        
         
         # There is nothing to center
         return is_centered

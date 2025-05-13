@@ -82,7 +82,7 @@ class Taro_Node(SubscriberIf):
             # YOLO the frame
             reader =  yolo_reader.Yolo_Reader(self.yolo_model(frame))
             # Run Taro
-            self.taro_robot.run(reader)
+            self.taro_robot.run(reader, frame)
 
             dressed_frame = reader.get_dressed_frame(frame, self.get_logger())
             if parsed_args.imshow:

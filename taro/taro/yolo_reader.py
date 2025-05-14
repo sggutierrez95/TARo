@@ -21,8 +21,14 @@ class Yolo_Reader():
                 label = f"{result.names[class_id]} {confidence:.2f}"
                 cv2.putText(dressed_frame, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 
-
         return dressed_frame
+
+    def get_class(self):
+        for result in self.results:
+            boxes = result.boxes
+            for box in boxes:
+                class_id = int(box.cls[0])
+                return result.names[class_id]
 
     def evaluate_frame(self) -> FrameResults:
         frame_rets = FrameResults()

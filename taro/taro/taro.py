@@ -89,6 +89,7 @@ class Phases(Enum):
     DETECTION = 1
     GRABBING  = 2
     SORT      = 3
+    DROP      = 4
 
 
 class RobotState():
@@ -103,6 +104,7 @@ class TaroActions():
         self.robot = robot
         self.robot_if = robot_if
         self.logger = logger
+        self.prev_delta_margin = 0
 
     def delta_x_move(self, delta_margin):
         # We will use a linear function to determine how far to move left or right
@@ -180,21 +182,20 @@ class TaroActions():
         # the way we move depends on different joint states
         joint_weight = [0.0,0.0,0.0,0.0]
         if joints[3] > math.radians(10):
-            joint_weight = [0.0, 0.7, -0.4, 0.1]
+            joint_weight = [0.0, 0.8, -0.5, 0.1]
         elif abs(joints[3]) <= math.radians(10):
             # if our wrist is semi-straight
             # change will need to coccur mostly in the lower joint
             joint_weight = [0.0, 0.4, -0.2, 0.0]
         elif joints[3] < -math.radians(10):
-            joint_weight = [0.0, 0.7, 0.4, -0.1]
+            joint_weight = [0.0, 0.9, 0.5, -0.1]
         else:
             self.logger.warn(f'Case not handled Joint 3: {joints[3]}')
-
 
         joint_delta = [0.0,0.0,0.0,0.0]
 
         # radians per pixel every 5 pixel difference will  move 2 degress
-        m = math.radians(2) / 5
+        m = math.radians(5) / 5
         delta_ang = m * delta_margin
         for idx, weight in enumerate(joint_weight):
             joint_delta[idx] = weight * delta_ang
@@ -205,6 +206,12 @@ class TaroActions():
     def move_straight(self, current_robot_state: RobotState, reader : yolo_reader.Yolo_Reader):
         self.logger.info('Moving Straight')
         frame_results = reader.evaluate_frame()
+
+        if frame_results.detections is None:
+            # we might have lost the detection in YOLO
+            # so we might be ok to close so just assume  
+            # we are close enough
+            return True
 
         detection_to_center = None
         for detection in frame_results.detections:
@@ -220,17 +227,8 @@ class TaroActions():
         orig_img_height, orig_img_width, channels = detection_to_center.orig_img.shape
         self.logger.info(f"Original Size of Img Height : { orig_img_height}, Width : {orig_img_width}")
 
-        # We need to move straight until we match the image aspect ratio
-        # # Get Bounding Box Height, Width
-        # bb_height = y_2 - y_1
-        # bb_width = x_2 - x_1
 
-        # bb_ratio = bb_width / bb_height
-        # orig_img_ratio = orig_img_width / orig_img_height
-        # self.logger.info(f"Image ratio : { orig_img_ratio}")
-        # self.logger.info(f"Bounding Box ratio : { bb_ratio}")
         delta_joints = self.delta_arm_joints(current_robot_state.joints, x_1)
-        self.logger.info(f'Delta Joints [ {delta_joints[0]}, {delta_joints[1]}, {delta_joints[2]}, {delta_joints[3]}]')
         sum_delta = 0.0
         for idx, delta in enumerate(delta_joints):
             sum_delta = sum_delta + delta
@@ -243,6 +241,11 @@ class TaroActions():
         self.logger.info('Begining Bounding Box Centering')
 
         frame_results = reader.evaluate_frame()
+
+        if frame_results.detections is None:
+            # we might have lost the detection in YOLO
+            # so we might be ok to close so just assume its centered
+            return True
 
         detection_to_center = None
         for detection in frame_results.detections:
@@ -272,27 +275,50 @@ class TaroActions():
         padded_optimal_height_margin = optimal_height_margin + pixel_padding
 
         is_centered = True
+        LOCKUP_THRESHOLD = 0 # if don't move then out config is messed up
         if x_1 > padded_optimal_width_margin:
             is_centered = False
             self.logger.info(f'BB too far to the right. Move Left X1 = {x_1} > ~{optimal_width_margin}')
             delta_margin = abs(x_1 - optimal_width_margin )
-            self.move_left(current_robot_state, delta_margin)
+            if abs(delta_margin - self.prev_delta_margin) < LOCKUP_THRESHOLD:
+                self.logger.info('Possible lock up. Moving back to inital.')
+                override = Phases.INITIAL
+                return None
+            else:
+                self.move_left(current_robot_state, delta_margin)
         if (orig_img_width - x_2) > padded_optimal_width_margin:
             is_centered = False
             self.logger.info(f'BB too far to the Left. Move Right orig_img_width - x_2 = {orig_img_width - x_2} > ~{optimal_width_margin}')
             delta_margin = abs((orig_img_width - x_2) - optimal_width_margin )
+            if abs(delta_margin - self.prev_delta_margin) < LOCKUP_THRESHOLD:
+                self.logger.info('Possible lock up. Moving back to inital.')
+                override = Phases.INITIAL
+                return None
             self.move_right(current_robot_state, delta_margin)
 
         if y_1 > padded_optimal_height_margin:
             is_centered = False
             self.logger.info(f'BB too low. Move up Y1 = {y_1} > ~{optimal_height_margin}')
             delta_margin = abs(y_1 - optimal_height_margin )
-            self.move_up(current_robot_state, delta_margin)
+            if abs(delta_margin - self.prev_delta_margin) < LOCKUP_THRESHOLD:
+                self.logger.info('Possible lock up. Moving back to inital.')
+                override = Phases.INITIAL
+                return None
+            else:
+                self.move_up(current_robot_state, delta_margin)
         if (orig_img_height - y_2) > padded_optimal_height_margin:
             is_centered = False
             self.logger.info(f'BB too high. Move down orig_img_height - y_2 = {orig_img_height - y_2} > ~{optimal_height_margin}')
             delta_margin = abs((orig_img_height - y_2) - optimal_height_margin )
-            self.move_down(current_robot_state, delta_margin)
+            if abs(delta_margin - self.prev_delta_margin) < LOCKUP_THRESHOLD:
+                self.logger.info('Possible lock up. Moving back to inital.')
+                override = Phases.INITIAL
+                return None
+            else:
+                self.move_down(current_robot_state, delta_margin)
+
+        if not is_centered:
+            self.prev_delta_margin = delta_margin
         # There is nothing to center
         return is_centered
         
@@ -308,8 +334,8 @@ ARM_BACK_RIGHT_BIN_POS  = [         2.9332,              0.2169,              0.
 ARM_FRONT_LEFT_BIN_POS  = [        -2.6902,                 0.0,              1.5707,                1.3624]
 ARM_FRONT_RIGHT_BIN_POS = [         2.7597,                 0.0,               1.319,                1.5707]
 #                              eef_eef_left_joint
-GRIPPER_CLOSE           = [               0.5503]       
-GRIPPER_OPEN            = [                  0.0]       
+GRIPPER_CLOSE           = [               math.radians(60)]       
+GRIPPER_OPEN            = [                            0.0]       
 class TARo():
     def __init__(self, urdf_path : str, arm_joint_if, gripper_joints_if, logger ):
         self.robot = rtb.ERobot.URDF(urdf_path , gripper='eef_link')
@@ -320,21 +346,29 @@ class TARo():
         self.robot_if = Robot_State_If(self.robot, arm_joint_if, gripper_joints_if, logger)
         self.actions = TaroActions(self.robot, self.robot_if, logger)
         self.logger = logger
+        self.robot_if.cmd_gripper(GRIPPER_OPEN)
 
     def run(self, reader : yolo_reader.Yolo_Reader, frame : cv2.Mat):
         match self.state:
             case Phases.INITIAL:
+                self.robot_if.cmd_gripper(GRIPPER_OPEN)
                 self.robot_state.position = self.robot_if.cmd_arm(ARM_INITIAL_POS)
                 self.robot_state.joints = ARM_INITIAL_POS
                 self.state = Phases.DETECTION
+                self.yolo_class = None
             case Phases.DETECTION:
                 # here is something where we want to develop a sophisticated searching algorithm until we found a detection
                 frame_rets = reader.evaluate_frame()
                 if frame_rets.waste_detected:
+                    self.yolo_class = reader.get_class()
                     self.logger.info('Found waste!')
                     self.state = Phases.GRABBING
             case Phases.GRABBING:
                 is_centered = self.actions.center_bb(self.robot_state, reader )
+                if is_centered is None:
+                    self.robot_state.position = self.robot_if.cmd_arm(ARM_INITIAL_POS)
+                    self.robot_state.joints = ARM_INITIAL_POS
+                    self.state = Phases.INITIAL
                 if is_centered:
                     ok_to_grab = self.actions.move_straight(self.robot_state, reader)
                     if ok_to_grab:
@@ -342,32 +376,28 @@ class TARo():
                         self.robot_if.cmd_gripper(GRIPPER_CLOSE)
                         self.state = Phases.SORT
             case Phases.SORT:
-                yolo_class = reader.get_class()
-
-                if yolo_class in DISCARDABLE:
-                    self.logger.info(f'Placing {yolo_class} in DISCARDABLE')
+                if self.yolo_class in DISCARDABLE:
+                    self.logger.info(f'Placing {self.yolo_class} in DISCARDABLE')
                     self.robot_state.position = self.robot_if.cmd_arm(ARM_BACK_LEFT_BIN_POS)
                     self.robot_state.joints = ARM_BACK_LEFT_BIN_POS
-                elif yolo_class in SALVAGABLE:
-                    self.logger.info(f'Placing {yolo_class} in SALVAGABLE')
+                elif self.yolo_class in SALVAGABLE:
+                    self.logger.info(f'Placing {self.yolo_class} in SALVAGABLE')
                     self.robot_state.position = self.robot_if.cmd_arm(ARM_BACK_RIGHT_BIN_POS)
                     self.robot_state.joints = ARM_BACK_RIGHT_BIN_POS
-                elif yolo_class in RECYCLABLE:
-                    self.logger.info(f'Placing {yolo_class} in RECYCLABLE')
-                    self.robot_state.position = self.robot_if.cmd_arm(ARM_FRONT_LEFT_BIN_POS)
-                    self.robot_state.joints = ARM_FRONT_LEFT_BIN_POS
-                else:
-                    self.logger.info(f'Placing {yolo_class} in COMPOSTABLE')
+                elif self.yolo_class in RECYCLABLE:
+                    self.logger.info(f'Placing {self.yolo_class} in RECYCLABLE')
                     self.robot_state.position = self.robot_if.cmd_arm(ARM_FRONT_RIGHT_BIN_POS)
                     self.robot_state.joints = ARM_FRONT_RIGHT_BIN_POS
-                
+                else:
+                    self.logger.info(f'Placing {self.yolo_class} in COMPOSTABLE')
+                    self.robot_state.position = self.robot_if.cmd_arm(ARM_FRONT_LEFT_BIN_POS)
+                    self.robot_state.joints = ARM_FRONT_LEFT_BIN_POS
+
+                self.state = Phases.DROP
+            case Phases.DROP:
                 self.robot_if.cmd_gripper(GRIPPER_OPEN)
                 self.state = Phases.INITIAL
 
-
-            
-
-                # self.state = Phases.DETECTION
 
     def destroy(self):
         self.robot_if.destroy()
